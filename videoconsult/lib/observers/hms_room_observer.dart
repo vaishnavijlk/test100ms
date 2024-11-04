@@ -132,6 +132,28 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
     return hmsSdk.stopScreenShare();
   }
 
+  Future<void> addPeer(HMSVideoTrack hmsVideoTrack, HMSPeer peer) async {
+    final tracks = [..._peerNodeStreamController.value];
+    final todoIndex = tracks.indexWhere((t) => t.peer?.peerId == peer.peerId);
+    if (todoIndex >= 0) {
+      print("onTrackUpdate ${peer.name} ${hmsVideoTrack.isMute}");
+      tracks[todoIndex] = PeerTrackNode(hmsVideoTrack, peer, false);
+    } else {
+      tracks.add(PeerTrackNode(hmsVideoTrack, peer, false));
+    }
+
+    _peerNodeStreamController.add(tracks);
+  }
+
+  Future<void> deletePeer(String id) async {
+    final tracks = [..._peerNodeStreamController.value];
+    final todoIndex = tracks.indexWhere((t) => t.peer?.peerId == id);
+    if (todoIndex >= 0) {
+      tracks.removeAt(todoIndex);
+    }
+    _peerNodeStreamController.add(tracks);
+  }
+
   @override
   void onChangeTrackStateRequest(
       {required HMSTrackChangeRequest hmsTrackChangeRequest}) {
@@ -241,23 +263,22 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
   //   }
   // }
   @override
-  void onTrackUpdate({
-    required HMSTrack track,
-    required HMSTrackUpdate trackUpdate,
-    required HMSPeer peer,
-  }) {
-    final tracks = [..._peerNodeStreamController.value];
-
-    // Identify if it's a local peer or remote peer update
-    if (peer.isLocal) {
-      // Update or remove local peer tracks accordingly
-      _updateLocalPeerTrack(tracks, peer, track, trackUpdate);
-    } else {
-      // Update or remove remote peer tracks
-      _updateRemotePeerTrack(tracks, peer, track, trackUpdate);
+  void onTrackUpdate(
+      {required HMSTrack track,
+      required HMSTrackUpdate trackUpdate,
+      required HMSPeer peer}) {
+    print("on track update called");
+    if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
+      if (trackUpdate == HMSTrackUpdate.trackRemoved) {
+        roomOverviewBloc
+            .add(RoomOverviewOnPeerLeave(track as HMSVideoTrack, peer));
+      } else if (trackUpdate == HMSTrackUpdate.trackAdded ||
+          trackUpdate == HMSTrackUpdate.trackMuted ||
+          trackUpdate == HMSTrackUpdate.trackUnMuted) {
+        roomOverviewBloc
+            .add(RoomOverviewOnPeerJoin(track as HMSVideoTrack, peer));
+      }
     }
-
-    _peerNodeStreamController.add(tracks);
   }
 
 // Helper function to update local peer tracks

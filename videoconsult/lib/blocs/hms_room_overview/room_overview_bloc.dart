@@ -30,6 +30,8 @@ class RoomOverviewBloc extends Bloc<RoomOverviewEvent, RoomOverviewState> {
     on<RoomOverviewJoinRequested>(_joinRequested);
     on<RoomOverviewLeaveRequested>(_leaveRequested);
     on<RoomOverviewSetOffScreen>(_setOffScreen);
+    on<RoomOverviewOnPeerJoin>(_onPeerJoin);
+    on<RoomOverviewOnPeerLeave>(_onPeerLeave);
   }
 
   Future<void> _onSubscription(RoomOverviewSubscriptionRequested event,
@@ -140,5 +142,15 @@ class RoomOverviewBloc extends Bloc<RoomOverviewEvent, RoomOverviewState> {
   Future<void> _setOffScreen(
       RoomOverviewSetOffScreen event, Emitter<RoomOverviewState> emit) async {
     await roomObserver.setOffScreen(event.index, event.setOffScreen);
+  }
+
+  Future<void> _onPeerLeave(
+      RoomOverviewOnPeerLeave event, Emitter<RoomOverviewState> emit) async {
+    await roomObserver.deletePeer(event.hmsPeer.peerId);
+  }
+
+  Future<void> _onPeerJoin(
+      RoomOverviewOnPeerJoin event, Emitter<RoomOverviewState> emit) async {
+    await roomObserver.addPeer(event.hmsVideoTrack, event.hmsPeer);
   }
 }

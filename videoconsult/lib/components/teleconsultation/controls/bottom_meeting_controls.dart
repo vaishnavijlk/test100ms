@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class BottomMeetingControls extends StatelessWidget {
+class BottomMeetingControls extends StatefulWidget {
   const BottomMeetingControls({
     super.key,
     required this.isVideoMuted,
@@ -21,6 +21,11 @@ class BottomMeetingControls extends StatelessWidget {
   final bool isKioskMode;
 
   @override
+  State<BottomMeetingControls> createState() => _BottomMeetingControlsState();
+}
+
+class _BottomMeetingControlsState extends State<BottomMeetingControls> {
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final double buttonSize = max(50, 0.07 * screenWidth);
@@ -33,12 +38,12 @@ class BottomMeetingControls extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            if (!isKioskMode)
+            if (!widget.isKioskMode)
               SizedBox(
                 width: buttonSize,
                 height: buttonSize,
                 child: RawMaterialButton(
-                  onPressed: onLeaveButtonPress,
+                  onPressed: widget.onLeaveButtonPress,
                   elevation: 2.0,
                   fillColor: Colors.red,
                   shape: const RoundedRectangleBorder(
@@ -57,7 +62,7 @@ class BottomMeetingControls extends StatelessWidget {
               width: buttonSize,
               height: buttonSize,
               child: RawMaterialButton(
-                onPressed: onAudioButtonPress,
+                onPressed: widget.onAudioButtonPress,
                 elevation: 2.0,
                 fillColor: Colors.grey,
                 shape: const RoundedRectangleBorder(
@@ -65,7 +70,7 @@ class BottomMeetingControls extends StatelessWidget {
                 ),
                 child: Center(
                   child: Icon(
-                    isAudioMuted ? Icons.mic_off : Icons.mic,
+                    widget.isAudioMuted ? Icons.mic_off : Icons.mic,
                     size: iconSize,
                     color: Colors.white,
                   ),
@@ -76,7 +81,7 @@ class BottomMeetingControls extends StatelessWidget {
               width: buttonSize,
               height: buttonSize,
               child: RawMaterialButton(
-                onPressed: onVideoButtonPress,
+                onPressed: widget.onVideoButtonPress,
                 elevation: 2.0,
                 fillColor: Colors.grey,
                 shape: const RoundedRectangleBorder(
@@ -84,7 +89,7 @@ class BottomMeetingControls extends StatelessWidget {
                 ),
                 child: Center(
                   child: Icon(
-                    isVideoMuted ? Icons.videocam_off : Icons.videocam,
+                    widget.isVideoMuted ? Icons.videocam_off : Icons.videocam,
                     size: iconSize,
                     color: Colors.white,
                   ),

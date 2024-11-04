@@ -63,3 +63,15 @@ class RoomOverviewOnJoinSuccess extends RoomOverviewEvent {
   final HMSRoom hmsRoom;
   const RoomOverviewOnJoinSuccess(this.hmsRoom);
 }
+
+class RoomOverviewOnPeerLeave extends RoomOverviewEvent {
+  final HMSPeer hmsPeer;
+  final HMSVideoTrack hmsVideoTrack;
+  const RoomOverviewOnPeerLeave(this.hmsVideoTrack, this.hmsPeer);
+}
+
+class RoomOverviewOnPeerJoin extends RoomOverviewEvent {
+  final HMSPeer hmsPeer;
+  final HMSVideoTrack hmsVideoTrack;
+  const RoomOverviewOnPeerJoin(this.hmsVideoTrack, this.hmsPeer);
+}

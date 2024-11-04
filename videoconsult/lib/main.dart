@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:videoconsult/blocs/hms_room_overview/room_overview_bloc.dart';
@@ -62,7 +63,7 @@ class _TCMeetingScreenContentState extends State<TCMeetingScreenContent> {
   late String videoUrl;
   int selectedDevice = 3;
   String authToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoyLCJ0eXBlIjoiYXBwIiwiYXBwX2RhdGEiOm51bGwsImFjY2Vzc19rZXkiOiI2NjQ1YTAyNzhmOWU5YTNiM2M2MDM5N2UiLCJyb2xlIjoiZ3Vlc3QiLCJyb29tX2lkIjoiNjcwZjczNjM4M2I3NWU1NWI4NTA3OGYwIiwidXNlcl9pZCI6IjExZDBhNzRmLTEwMWEtNDE4ZC1iZGM3LTcyZDk3NzZlYmMxZCIsImV4cCI6MTcyOTY2NzUwNywianRpIjoiMWE5ZWQxMWItNjI3NS00ZjAyLWI2N2UtMzQ3MmJjNzM1MGJjIiwiaWF0IjoxNzI5NTgxMTA3LCJpc3MiOiI2NjQ1YTAyNzhmOWU5YTNiM2M2MDM5N2MiLCJuYmYiOjE3Mjk1ODExMDcsInN1YiI6ImFwaSJ9.zU-gxrhi1W1wQ_OjuZdI1pONNpEbpgFvEejs5KQda8w';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoyLCJ0eXBlIjoiYXBwIiwiYXBwX2RhdGEiOm51bGwsImFjY2Vzc19rZXkiOiI2NjQ1YTAyNzhmOWU5YTNiM2M2MDM5N2UiLCJyb2xlIjoiZ3Vlc3QiLCJyb29tX2lkIjoiNjcyNDgxY2ZlMWM3N2ZjYzRjMjc3MGIxIiwidXNlcl9pZCI6ImRlNDhkZDlhLWJkMGUtNDY4OS04NzMxLTJjNjMyZTdmMjBjNyIsImV4cCI6MTczMDUzMjE3OCwianRpIjoiNDlhY2E5ZTktMjEwMi00YWJjLTk3MDItZjNmODRhZjI1YTVjIiwiaWF0IjoxNzMwNDQ1Nzc4LCJpc3MiOiI2NjQ1YTAyNzhmOWU5YTNiM2M2MDM5N2MiLCJuYmYiOjE3MzA0NDU3NzgsInN1YiI6ImFwaSJ9.c5RcLGKDzyK3a8QIr3SbK_Zaisc5vPjEsBUd57eBnD4';
   String header = '';
   String videoName = '';
   bool isUIRendered = false;
@@ -112,7 +113,7 @@ class _TCMeetingScreenContentState extends State<TCMeetingScreenContent> {
           children: [
             authToken.isNotEmpty
                 ? SizedBox(
-                    height: 400,
+                    height: 500,
                     child: Center(
                       child: MeetingPage(
                         onLeaveButtonPress: hangUp,
