@@ -34,8 +34,6 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
   final _currentAudioDeviceStreamController =
       BehaviorSubject<HMSAudioDevice>.seeded(HMSAudioDevice.AUTOMATIC);
 
-  // final _peerStreamController =
-  //     BehaviorSubject<List<HMSPeer>>.seeded(const []);
 
   Stream<List<PeerTrackNode>> getTracks() =>
       _peerNodeStreamController.asBroadcastStream();
@@ -157,17 +155,17 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
   @override
   void onChangeTrackStateRequest(
       {required HMSTrackChangeRequest hmsTrackChangeRequest}) {
-    // TODO: implement onChangeTrackStateRequest
+  
   }
 
   @override
   void onHMSError({required HMSException error}) {
-    // TODO: implement onError
+   
   }
 
   @override
   void onJoin({required HMSRoom room}) {
-    //_peerStreamController.add(room.peers ?? []);
+  
     if (!roomOverviewBloc.isClosed) {
       roomOverviewBloc.add(RoomOverviewOnJoinSuccess(room));
     }
@@ -175,113 +173,63 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
 
   @override
   void onMessage({required HMSMessage message}) {
-    // TODO: implement onMessage
   }
 
   @override
   void onPeerUpdate({required HMSPeer peer, required HMSPeerUpdate update}) {
-    // final tracks = [..._peerNodeStreamController.value];
-    // switch (update) {
-    //   case HMSPeerUpdate.peerLeft:
-
-    //     print("peers: onPeerUpdate!!!!!!! peer left");
-    //     final todoIndex = tracks.indexWhere((t) => t.peer?.peerId == peer.peerId);
-    //     if (todoIndex >= 0) {
-    //       tracks.removeAt(todoIndex);
-    //     }
-    //     print("peers: onPeerUpdate!!!!!!!  $tracks");
-    //     break;
-    //   default:
-    //     break;
-    // }
-
-    // _peerNodeStreamController.add(tracks);
+   
   }
 
   @override
   void onReconnected() {
-    // TODO: implement onReconnected
+   
   }
 
   @override
   void onReconnecting() {
-    // TODO: implement onReconnecting
+   
   }
 
   @override
   void onRemovedFromRoom(
       {required HMSPeerRemovedFromPeer hmsPeerRemovedFromPeer}) {
-    // TODO: implement onRemovedFromRoom
+   
   }
 
   @override
   void onRoleChangeRequest({required HMSRoleChangeRequest roleChangeRequest}) {
-    // TODO: implement onRoleChangeRequest
+   
   }
 
   @override
   void onRoomUpdate({required HMSRoom room, required HMSRoomUpdate update}) {
-    // TODO: implement onRoomUpdate
+   
   }
 
-  // @override
-  // void onTrackUpdate(
-  //     {required HMSTrack track,
-  //     required HMSTrackUpdate trackUpdate,
-  //     required HMSPeer peer}) {
-  //   if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
-  //     if (trackUpdate == HMSTrackUpdate.trackRemoved) {
-  //       final tracks = [..._peerNodeStreamController.value];
-  //       final todoIndex =
-  //           tracks.indexWhere((t) => t.peer?.peerId == peer.peerId);
-  //       if (todoIndex >= 0) {
-  //         tracks.removeAt(todoIndex);
-  //       }
-  //       _peerNodeStreamController.add(tracks);
-  //     } else {
-  //       final tracks = [..._peerNodeStreamController.value];
-  //       final todoIndex =
-  //           tracks.indexWhere((t) => t.peer?.peerId == peer.peerId);
-  //       if (todoIndex >= 0) {
-  //         tracks[todoIndex] =
-  //             PeerTrackNode(track as HMSVideoTrack, peer, false);
-  //       } else {
-  //         tracks.add(PeerTrackNode(track as HMSVideoTrack, peer, false));
-  //       }
 
-  //       _peerNodeStreamController.add(tracks);
-  //     }
-  //   } else if (track.kind == HMSTrackKind.kHMSTrackKindAudio) {
-  //       final tracks = [..._peerNodeStreamController.value];
-  //       final todoIndex =
-  //           tracks.indexWhere((t) => t.peer?.peerId == peer.peerId);
-  //       if (todoIndex >= 0) {
-  //         tracks[todoIndex].peer?.audioTrack = track as HMSAudioTrack;
-  //       }
+      @override
+    void onTrackUpdate(
+        {required HMSTrack track,
+        required HMSTrackUpdate trackUpdate,
+        required HMSPeer peer}) {
+      if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
+        if (trackUpdate == HMSTrackUpdate.trackRemoved) {
+          roomOverviewBloc.add(RoomOverviewOnPeerLeave(track as HMSVideoTrack, peer));
+        } else if (trackUpdate == HMSTrackUpdate.trackAdded ||
+                  trackUpdate == HMSTrackUpdate.trackMuted ||
+                  trackUpdate == HMSTrackUpdate.trackUnMuted) {
+                
+          final peerAlreadyExists = roomOverviewBloc.state.peerTrackNodes
+              .any((node) => node.peer?.peerId == peer.peerId);
 
-  //       _peerNodeStreamController.add(tracks);
-  //   }
-  // }
-  @override
-  void onTrackUpdate(
-      {required HMSTrack track,
-      required HMSTrackUpdate trackUpdate,
-      required HMSPeer peer}) {
-    print("on track update called");
-    if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
-      if (trackUpdate == HMSTrackUpdate.trackRemoved) {
-        roomOverviewBloc
-            .add(RoomOverviewOnPeerLeave(track as HMSVideoTrack, peer));
-      } else if (trackUpdate == HMSTrackUpdate.trackAdded ||
-          trackUpdate == HMSTrackUpdate.trackMuted ||
-          trackUpdate == HMSTrackUpdate.trackUnMuted) {
-        roomOverviewBloc
-            .add(RoomOverviewOnPeerJoin(track as HMSVideoTrack, peer));
+          if (!peerAlreadyExists || trackUpdate == HMSTrackUpdate.trackUnMuted) {
+            roomOverviewBloc.add(RoomOverviewOnPeerJoin(track as HMSVideoTrack, peer));
+          }
+        }
       }
     }
-  }
 
-// Helper function to update local peer tracks
+
   void _updateLocalPeerTrack(
     List<PeerTrackNode> tracks,
     HMSPeer peer,
@@ -323,7 +271,6 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
 
   @override
   void onUpdateSpeakers({required List<HMSSpeaker> updateSpeakers}) {
-    // TODO: implement onUpdateSpeakers
   }
 
   @override
@@ -331,7 +278,6 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
       {HMSActionResultListenerMethod? methodType,
       Map<String, dynamic>? arguments,
       required HMSException hmsException}) {
-    // TODO: implement onException
   }
 
   @override
@@ -355,13 +301,11 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
 
   @override
   void onSessionStoreAvailable({HMSSessionStore? hmsSessionStore}) {
-    // TODO: implement onSessionStoreAvailable
   }
 
   @override
   void onPeerListUpdate(
       {required List<HMSPeer> addedPeers,
       required List<HMSPeer> removedPeers}) {
-    // TODO: implement onPeerListUpdate
   }
 }

@@ -63,7 +63,7 @@ class _TCMeetingScreenContentState extends State<TCMeetingScreenContent> {
   late String videoUrl;
   int selectedDevice = 3;
   String authToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoyLCJ0eXBlIjoiYXBwIiwiYXBwX2RhdGEiOm51bGwsImFjY2Vzc19rZXkiOiI2NjQ1YTAyNzhmOWU5YTNiM2M2MDM5N2UiLCJyb2xlIjoiZ3Vlc3QiLCJyb29tX2lkIjoiNjcyNDgxY2ZlMWM3N2ZjYzRjMjc3MGIxIiwidXNlcl9pZCI6ImRlNDhkZDlhLWJkMGUtNDY4OS04NzMxLTJjNjMyZTdmMjBjNyIsImV4cCI6MTczMDUzMjE3OCwianRpIjoiNDlhY2E5ZTktMjEwMi00YWJjLTk3MDItZjNmODRhZjI1YTVjIiwiaWF0IjoxNzMwNDQ1Nzc4LCJpc3MiOiI2NjQ1YTAyNzhmOWU5YTNiM2M2MDM5N2MiLCJuYmYiOjE3MzA0NDU3NzgsInN1YiI6ImFwaSJ9.c5RcLGKDzyK3a8QIr3SbK_Zaisc5vPjEsBUd57eBnD4';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoyLCJ0eXBlIjoiYXBwIiwiYXBwX2RhdGEiOm51bGwsImFjY2Vzc19rZXkiOiI2NjQ1YTAyNzhmOWU5YTNiM2M2MDM5N2UiLCJyb2xlIjoiZ3Vlc3QiLCJyb29tX2lkIjoiNjcyNDgxY2ZlMWM3N2ZjYzRjMjc3MGIxIiwidXNlcl9pZCI6IjlhYmQ0OTQ2LTMwMGQtNGVjYy1iMjYyLWNjZDVjZWVhNjI2YiIsImV4cCI6MTczMDc3NDI0OSwianRpIjoiYmJlYTRkZDAtOGFhZS00ZTI3LTg1MjAtOWJjOWU1YzFmMTNkIiwiaWF0IjoxNzMwNjg3ODQ5LCJpc3MiOiI2NjQ1YTAyNzhmOWU5YTNiM2M2MDM5N2MiLCJuYmYiOjE3MzA2ODc4NDksInN1YiI6ImFwaSJ9.e2hD8eK9SzLDh0QcxFPgctWaM-LK9lSaFQhjEeVJA5c';
   String header = '';
   String videoName = '';
   bool isUIRendered = false;
@@ -109,23 +109,17 @@ class _TCMeetingScreenContentState extends State<TCMeetingScreenContent> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        body: Column(
-          children: [
-            authToken.isNotEmpty
-                ? SizedBox(
-                    height: 500,
-                    child: Center(
-                      child: MeetingPage(
-                        onLeaveButtonPress: hangUp,
-                        showOnlyRemotePeer: false,
-                        meetingWidgetHeight: 400,
-                      ),
+      body: authToken.isNotEmpty
+          ?  SizedBox(
+            height: 500,
+            child: MeetingPage(
+                      onLeaveButtonPress: () {},
+                      showOnlyRemotePeer: false,
+                      meetingWidgetHeight: MediaQuery.of(context).size.height,
                     ),
-                  )
-                : CircularProgressIndicator()
-          ],
-        ),
-      ),
+          )
+          : Center(child: CircularProgressIndicator()),
+    )
     );
   }
 }

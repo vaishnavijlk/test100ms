@@ -10,7 +10,6 @@ import 'package:videoconsult/components/teleconsultation/controls/bottom_meeting
 import 'package:videoconsult/components/teleconsultation/controls/utils.dart';
 import 'package:videoconsult/components/teleconsultation/doctor_tiles.dart';
 import 'package:videoconsult/components/teleconsultation/peer_tile.dart';
-import 'package:videoconsult/models/teleconsultation/peer_track_node.dart';
 
 class MeetingPage extends StatefulWidget {
   const MeetingPage({
@@ -49,13 +48,9 @@ class _MeetingPageState extends State<MeetingPage> {
       HMSPeer? localPeer;
       HMSVideoTrack? localPeerVideoTrack;
 
-      final List<PeerTrackNode> remotePeers = [];
-
       for (final node in state.peerTrackNodes) {
         if (node.peer != null) {
-          if (!node.peer!.isLocal) {
-            remotePeers.add(node);
-          } else if (!widget.showOnlyRemotePeer) {
+          if (!widget.showOnlyRemotePeer && node.peer!.isLocal) {
             localPeer = node.peer;
             localPeerVideoTrack = node.hmsVideoTrack;
           }
@@ -68,13 +63,16 @@ class _MeetingPageState extends State<MeetingPage> {
           backgroundColor: Colors.black,
           body: Stack(
             children: [
-              DoctorTiles(peerTrackNodes: state.peerTrackNodes),
+     DoctorTiles(peerTrackNodes: state.peerTrackNodes),
+
               if (localPeer != null &&
-                  localPeerVideoTrack != null &&
-                  state.peerTrackNodes.length > 1)
+                  localPeerVideoTrack != null 
+                  //&&
+                  // state.peerTrackNodes.length > 1
+                  )
                 Positioned(
-                  top: remotePeers.length == 3 ? null : 10,
-                  bottom: remotePeers.length == 3 ? 25 : null,
+                  top:  10,
+                  bottom:  null,
                   right: 10,
                   child: Container(
                     width: screenWidth * 0.23,
@@ -141,3 +139,5 @@ class _MeetingPageState extends State<MeetingPage> {
     });
   }
 }
+
+
