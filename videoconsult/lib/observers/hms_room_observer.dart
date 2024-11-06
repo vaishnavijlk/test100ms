@@ -217,7 +217,7 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
           roomOverviewBloc.add(RoomOverviewOnPeerLeave(track as HMSVideoTrack, peer));
         } else if (trackUpdate == HMSTrackUpdate.trackAdded ||
                   trackUpdate == HMSTrackUpdate.trackMuted ||
-                  trackUpdate == HMSTrackUpdate.trackUnMuted) {
+                  trackUpdate == HMSTrackUpdate.trackUnMuted ) {
                 
           final peerAlreadyExists = roomOverviewBloc.state.peerTrackNodes
               .any((node) => node.peer?.peerId == peer.peerId);
@@ -229,45 +229,8 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
       }
     }
 
+   
 
-  void _updateLocalPeerTrack(
-    List<PeerTrackNode> tracks,
-    HMSPeer peer,
-    HMSTrack track,
-    HMSTrackUpdate trackUpdate,
-  ) {
-    if (trackUpdate == HMSTrackUpdate.trackRemoved) {
-      tracks.removeWhere((node) => node.peer?.peerId == peer.peerId);
-    } else {
-      final index =
-          tracks.indexWhere((node) => node.peer?.peerId == peer.peerId);
-      if (index >= 0) {
-        tracks[index] = PeerTrackNode(track as HMSVideoTrack, peer, false);
-      } else {
-        tracks.add(PeerTrackNode(track as HMSVideoTrack, peer, false));
-      }
-    }
-  }
-
-// Helper function to update remote peer tracks
-  void _updateRemotePeerTrack(
-    List<PeerTrackNode> tracks,
-    HMSPeer peer,
-    HMSTrack track,
-    HMSTrackUpdate trackUpdate,
-  ) {
-    if (trackUpdate == HMSTrackUpdate.trackRemoved) {
-      tracks.removeWhere((node) => node.peer?.peerId == peer.peerId);
-    } else {
-      final index =
-          tracks.indexWhere((node) => node.peer?.peerId == peer.peerId);
-      if (index >= 0) {
-        tracks[index] = PeerTrackNode(track as HMSVideoTrack, peer, false);
-      } else {
-        tracks.add(PeerTrackNode(track as HMSVideoTrack, peer, false));
-      }
-    }
-  }
 
   @override
   void onUpdateSpeakers({required List<HMSSpeaker> updateSpeakers}) {

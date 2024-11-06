@@ -66,9 +66,8 @@ class _MeetingPageState extends State<MeetingPage> {
      DoctorTiles(peerTrackNodes: state.peerTrackNodes),
 
               if (localPeer != null &&
-                  localPeerVideoTrack != null 
-                  //&&
-                  // state.peerTrackNodes.length > 1
+                  localPeerVideoTrack != null &&
+                  state.peerTrackNodes.length > 1
                   )
                 Positioned(
                   top:  10,
@@ -78,7 +77,7 @@ class _MeetingPageState extends State<MeetingPage> {
                     width: screenWidth * 0.23,
                     height: screenHeight * 0.25,
                     decoration: BoxDecoration(
-                      color: Colors.grey[900],
+                      color: Colors.grey[800],
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: ClipRRect(
@@ -117,12 +116,13 @@ class _MeetingPageState extends State<MeetingPage> {
                   alignment: Alignment.bottomCenter,
                   child: BottomMeetingControls(
                     isKioskMode: false,
-                    isVideoMuted: localPeerVideoTrack?.isMute ?? false,
-                    isAudioMuted: localPeer?.audioTrack?.isMute ?? false,
+                    isVideoMuted: state.isCameraMute,
+                    isAudioMuted: state.isMicMute,
                     onVideoButtonPress: () => {
                       context
                           .read<RoomOverviewBloc>()
-                          .add(const RoomOverviewLocalPeerVideoToggled())
+                          .add(const RoomOverviewLocalPeerVideoToggled()),
+                     
                     },
                     onAudioButtonPress: () => {
                       context
