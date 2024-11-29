@@ -33,6 +33,7 @@ class PeerTile extends StatelessWidget {
           children: [
             (videoTrack != null && !(videoTrack?.isMute ?? true))
                 ? HMSVideoView(
+                    key: Key(videoTrack!.trackId),
                     track: videoTrack!,
                     scaleType: ScaleType.SCALE_ASPECT_FILL,
                   )
@@ -59,8 +60,6 @@ class PeerTile extends StatelessWidget {
                       ),
                     ),
                   ),
-            
-           
           ],
         ),
       );
