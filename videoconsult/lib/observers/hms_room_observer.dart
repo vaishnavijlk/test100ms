@@ -6,7 +6,7 @@ import 'package:videoconsult/blocs/hms_room_overview/room_overview_event.dart';
 import 'package:videoconsult/models/teleconsultation/peer_track_node.dart';
 
 class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
-  late HMSSDK hmsSdk;
+  HMSSDK hmsSdk = HMSSDK();
   RoomOverviewBloc roomOverviewBloc;
 
   HmsRoomObserver(this.roomOverviewBloc) {
@@ -34,6 +34,8 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
   final _currentAudioDeviceStreamController =
       BehaviorSubject<HMSAudioDevice>.seeded(HMSAudioDevice.AUTOMATIC);
 
+  // final _peerStreamController =
+  //     BehaviorSubject<List<HMSPeer>>.seeded(const []);
 
   Stream<List<PeerTrackNode>> getTracks() =>
       _peerNodeStreamController.asBroadcastStream();
@@ -130,6 +132,102 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
     return hmsSdk.stopScreenShare();
   }
 
+  @override
+  void onChangeTrackStateRequest(
+      {required HMSTrackChangeRequest hmsTrackChangeRequest}) {
+    // TODO: implement onChangeTrackStateRequest
+  }
+
+  @override
+  void onHMSError({required HMSException error}) {
+    // TODO: implement onError
+  }
+
+  @override
+  void onJoin({required HMSRoom room}) {
+    //_peerStreamController.add(room.peers ?? []);
+    if (!roomOverviewBloc.isClosed) {
+      roomOverviewBloc.add(RoomOverviewOnJoinSuccess(room));
+    }
+  }
+
+  @override
+  void onMessage({required HMSMessage message}) {
+    // TODO: implement onMessage
+  }
+
+  @override
+  void onPeerUpdate({required HMSPeer peer, required HMSPeerUpdate update}) {
+    // final tracks = [..._peerNodeStreamController.value];
+    // switch (update) {
+    //   case HMSPeerUpdate.peerLeft:
+
+    //     print("peers: onPeerUpdate!!!!!!! peer left");
+    //     final todoIndex = tracks.indexWhere((t) => t.peer?.peerId == peer.peerId);
+    //     if (todoIndex >= 0) {
+    //       tracks.removeAt(todoIndex);
+    //     }
+    //     print("peers: onPeerUpdate!!!!!!!  $tracks");
+    //     break;
+    //   default:
+    //     break;
+    // }
+
+    // _peerNodeStreamController.add(tracks);
+  }
+
+  @override
+  void onReconnected() {
+    // TODO: implement onReconnected
+  }
+
+  @override
+  void onReconnecting() {
+    // TODO: implement onReconnecting
+  }
+
+  @override
+  void onRemovedFromRoom(
+      {required HMSPeerRemovedFromPeer hmsPeerRemovedFromPeer}) {
+    // TODO: implement onRemovedFromRoom
+  }
+
+  @override
+  void onRoleChangeRequest({required HMSRoleChangeRequest roleChangeRequest}) {
+    // TODO: implement onRoleChangeRequest
+  }
+
+  @override
+  void onRoomUpdate({required HMSRoom room, required HMSRoomUpdate update}) {
+    // TODO: implement onRoomUpdate
+  }
+
+  @override
+  void onTrackUpdate(
+      {required HMSTrack track,
+      required HMSTrackUpdate trackUpdate,
+      required HMSPeer peer}) {
+    if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
+      if (!roomOverviewBloc.isClosed) {
+        if (trackUpdate == HMSTrackUpdate.trackRemoved) {
+          roomOverviewBloc
+              .add(RoomOverviewOnPeerLeave(track as HMSVideoTrack, peer));
+        } else if (trackUpdate == HMSTrackUpdate.trackAdded ||
+            trackUpdate == HMSTrackUpdate.trackMuted ||
+            trackUpdate == HMSTrackUpdate.trackUnMuted) {
+          final peerAlreadyExists = roomOverviewBloc.state.peerTrackNodes
+              .any((node) => node.peer?.peerId == peer.peerId);
+
+          if (!peerAlreadyExists ||
+              trackUpdate == HMSTrackUpdate.trackUnMuted) {
+            roomOverviewBloc
+                .add(RoomOverviewOnPeerJoin(track as HMSVideoTrack, peer));
+          }
+        }
+      }
+    }
+  }
+
   Future<void> addPeer(HMSVideoTrack hmsVideoTrack, HMSPeer peer) async {
     final tracks = [..._peerNodeStreamController.value];
     final todoIndex = tracks.indexWhere((t) => t.peer?.peerId == peer.peerId);
@@ -140,7 +238,9 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
       tracks.add(PeerTrackNode(hmsVideoTrack, peer, false));
     }
 
-    _peerNodeStreamController.add(tracks);
+    if (!_peerNodeStreamController.isClosed) {
+      _peerNodeStreamController.add(tracks);
+    }
   }
 
   Future<void> deletePeer(String id) async {
@@ -149,91 +249,14 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
     if (todoIndex >= 0) {
       tracks.removeAt(todoIndex);
     }
-    _peerNodeStreamController.add(tracks);
-  }
-
-  @override
-  void onChangeTrackStateRequest(
-      {required HMSTrackChangeRequest hmsTrackChangeRequest}) {
-  
-  }
-
-  @override
-  void onHMSError({required HMSException error}) {
-   
-  }
-
-  @override
-  void onJoin({required HMSRoom room}) {
-  
-    if (!roomOverviewBloc.isClosed) {
-      roomOverviewBloc.add(RoomOverviewOnJoinSuccess(room));
+    if (!_peerNodeStreamController.isClosed) {
+      _peerNodeStreamController.add(tracks);
     }
   }
-
-  @override
-  void onMessage({required HMSMessage message}) {
-  }
-
-  @override
-  void onPeerUpdate({required HMSPeer peer, required HMSPeerUpdate update}) {
-   
-  }
-
-  @override
-  void onReconnected() {
-   
-  }
-
-  @override
-  void onReconnecting() {
-   
-  }
-
-  @override
-  void onRemovedFromRoom(
-      {required HMSPeerRemovedFromPeer hmsPeerRemovedFromPeer}) {
-   
-  }
-
-  @override
-  void onRoleChangeRequest({required HMSRoleChangeRequest roleChangeRequest}) {
-   
-  }
-
-  @override
-  void onRoomUpdate({required HMSRoom room, required HMSRoomUpdate update}) {
-   
-  }
-
-
-      @override
-    void onTrackUpdate(
-        {required HMSTrack track,
-        required HMSTrackUpdate trackUpdate,
-        required HMSPeer peer}) {
-      if (track.kind == HMSTrackKind.kHMSTrackKindVideo) {
-        if (trackUpdate == HMSTrackUpdate.trackRemoved) {
-          roomOverviewBloc.add(RoomOverviewOnPeerLeave(track as HMSVideoTrack, peer));
-        } else if (trackUpdate == HMSTrackUpdate.trackAdded ||
-                  trackUpdate == HMSTrackUpdate.trackMuted ||
-                  trackUpdate == HMSTrackUpdate.trackUnMuted ) {
-                
-          final peerAlreadyExists = roomOverviewBloc.state.peerTrackNodes
-              .any((node) => node.peer?.peerId == peer.peerId);
-
-          if (!peerAlreadyExists || trackUpdate == HMSTrackUpdate.trackUnMuted) {
-            roomOverviewBloc.add(RoomOverviewOnPeerJoin(track as HMSVideoTrack, peer));
-          }
-        }
-      }
-    }
-
-   
-
 
   @override
   void onUpdateSpeakers({required List<HMSSpeaker> updateSpeakers}) {
+    // TODO: implement onUpdateSpeakers
   }
 
   @override
@@ -241,13 +264,16 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
       {HMSActionResultListenerMethod? methodType,
       Map<String, dynamic>? arguments,
       required HMSException hmsException}) {
+    // TODO: implement onException
   }
 
   @override
   void onSuccess(
       {HMSActionResultListenerMethod? methodType,
       Map<String, dynamic>? arguments}) {
-    _peerNodeStreamController.add([]);
+    if (!_peerNodeStreamController.isClosed) {
+      _peerNodeStreamController.add([]);
+    }
   }
 
   @override
@@ -264,11 +290,13 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
 
   @override
   void onSessionStoreAvailable({HMSSessionStore? hmsSessionStore}) {
+    // TODO: implement onSessionStoreAvailable
   }
 
   @override
   void onPeerListUpdate(
       {required List<HMSPeer> addedPeers,
       required List<HMSPeer> removedPeers}) {
+    // TODO: implement onPeerListUpdate
   }
 }
