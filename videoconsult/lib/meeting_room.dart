@@ -6,10 +6,11 @@ import 'package:hmssdk_flutter/hmssdk_flutter.dart';
 import 'package:videoconsult/blocs/hms_room_overview/room_overview_bloc.dart';
 import 'package:videoconsult/blocs/hms_room_overview/room_overview_event.dart';
 import 'package:videoconsult/blocs/hms_room_overview/room_overview_state.dart';
+import 'package:videoconsult/components/teleconsultation/chat_view.dart';
 import 'package:videoconsult/components/teleconsultation/controls/bottom_meeting_controls.dart';
-import 'package:videoconsult/components/teleconsultation/controls/utils.dart';
 import 'package:videoconsult/components/teleconsultation/doctor_tiles.dart';
 import 'package:videoconsult/components/teleconsultation/peer_tile.dart';
+import 'package:videoconsult/models/teleconsultation/peer_track_node.dart';
 
 class MeetingPage extends StatefulWidget {
   const MeetingPage({
@@ -42,7 +43,7 @@ class _MeetingPageState extends State<MeetingPage> {
   Widget build(BuildContext context) {
     final screenHeight = widget.meetingWidgetHeight;
     final screenWidth = MediaQuery.of(context).size.width;
-
+    final roomObserver = context.read<RoomOverviewBloc>().roomObserver;
     return BlocBuilder<RoomOverviewBloc, RoomOverviewState>(
         builder: (context, state) {
       HMSPeer? localPeer;
@@ -56,22 +57,22 @@ class _MeetingPageState extends State<MeetingPage> {
           }
         }
       }
-
+      bool isChatOpen = false;
       return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
           backgroundColor: Colors.black,
           body: Stack(
             children: [
-     DoctorTiles(peerTrackNodes: state.peerTrackNodes),
-
+              DoctorTiles(
+                peerTrackNodes: state.peerTrackNodes,
+              ),
               if (localPeer != null &&
                   localPeerVideoTrack != null &&
-                  state.peerTrackNodes.length > 1
-                  )
+                  state.peerTrackNodes.length > 1)
                 Positioned(
-                  top:  10,
-                  bottom:  null,
+                  top: 10,
+                  bottom: null,
                   right: 10,
                   child: Container(
                     width: screenWidth * 0.23,
@@ -90,27 +91,6 @@ class _MeetingPageState extends State<MeetingPage> {
                     ),
                   ),
                 ),
-              Align(
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: 0.1 * screenWidth,
-                  height: 0.1 * screenWidth,
-                  child: RawMaterialButton(
-                    onPressed: () {
-                      handleAudioSwitchToggle(context, state);
-                    },
-                    elevation: 2.0,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    child: Icon(
-                      Icons.headphones_outlined,
-                      size: max(25, screenWidth * 0.035),
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
               if (!widget.showOnlyRemotePeer)
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -122,7 +102,6 @@ class _MeetingPageState extends State<MeetingPage> {
                       context
                           .read<RoomOverviewBloc>()
                           .add(const RoomOverviewLocalPeerVideoToggled()),
-                     
                     },
                     onAudioButtonPress: () => {
                       context
@@ -130,6 +109,25 @@ class _MeetingPageState extends State<MeetingPage> {
                           .add(const RoomOverviewLocalPeerMicToggled())
                     },
                     onLeaveButtonPress: () => {handleExit(context)},
+                    onChatOpened: () {
+                      if (isChatOpen) return; // Prevent multiple triggers
+                      isChatOpen = true;
+
+                      showModalBottomSheet(
+                        useSafeArea: true,
+                        context: context,
+                        builder: (ctx) => FractionallySizedBox(
+                          heightFactor: 0.9,
+                          child: ChatWindow(
+                            peerTrackNodes: state.peerTrackNodes,
+                            roomObserver: roomObserver,
+                          ),
+                        ),
+                        isScrollControlled: true,
+                      ).whenComplete(() {
+                        isChatOpen = false;
+                      });
+                    },
                   ),
                 ),
             ],
@@ -139,5 +137,3 @@ class _MeetingPageState extends State<MeetingPage> {
     });
   }
 }
-
-

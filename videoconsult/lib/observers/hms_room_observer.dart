@@ -34,9 +34,6 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
   final _currentAudioDeviceStreamController =
       BehaviorSubject<HMSAudioDevice>.seeded(HMSAudioDevice.AUTOMATIC);
 
-  // final _peerStreamController =
-  //     BehaviorSubject<List<HMSPeer>>.seeded(const []);
-
   Stream<List<PeerTrackNode>> getTracks() =>
       _peerNodeStreamController.asBroadcastStream();
 
@@ -45,6 +42,11 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
 
   Stream<HMSAudioDevice> getCurrentAudioDevice() =>
       _currentAudioDeviceStreamController.asBroadcastStream();
+
+  final BehaviorSubject<List<HMSMessage>> _messagesStreamController =
+      BehaviorSubject<List<HMSMessage>>.seeded([]);
+
+  Stream<List<HMSMessage>> getMessages() => _messagesStreamController.stream;
 
   Future<HMSRoom?> _getRoom() async {
     HMSRoom? currRoom;
@@ -153,28 +155,48 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
 
   @override
   void onMessage({required HMSMessage message}) {
-    // TODO: implement onMessage
+    // Append the new message to the stream
+    final messages = [..._messagesStreamController.value];
+    messages.add(message);
+    _messagesStreamController.add(messages);
+  }
+
+  void sendDirectMessage(String message, HMSPeer peerTo, String type) {
+    // Create a local message object
+    final localMessage = HMSMessage(
+      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+      sender: HMSPeer(
+          peerId: peerTo.peerId,
+          name: peerTo.name,
+          isLocal: true,
+          role: peerTo.role,
+          isHandRaised: peerTo.isHandRaised),
+      message: message,
+      type: type,
+      time: DateTime.now(),
+      hmsMessageRecipient: HMSMessageRecipient(
+        recipientPeer: peerTo,
+        recipientRoles: null,
+        hmsMessageRecipientType: HMSMessageRecipientType.DIRECT,
+      ),
+    );
+
+    // Add the local message to the stream immediately
+    final messages = [..._messagesStreamController.value];
+    messages.add(localMessage);
+    _messagesStreamController.add(messages);
+
+    // Send the message using HMSSDK
+    hmsSdk.sendDirectMessage(
+      message: message,
+      peerTo: peerTo,
+      type: type,
+      hmsActionResultListener: this,
+    );
   }
 
   @override
-  void onPeerUpdate({required HMSPeer peer, required HMSPeerUpdate update}) {
-    // final tracks = [..._peerNodeStreamController.value];
-    // switch (update) {
-    //   case HMSPeerUpdate.peerLeft:
-
-    //     print("peers: onPeerUpdate!!!!!!! peer left");
-    //     final todoIndex = tracks.indexWhere((t) => t.peer?.peerId == peer.peerId);
-    //     if (todoIndex >= 0) {
-    //       tracks.removeAt(todoIndex);
-    //     }
-    //     print("peers: onPeerUpdate!!!!!!!  $tracks");
-    //     break;
-    //   default:
-    //     break;
-    // }
-
-    // _peerNodeStreamController.add(tracks);
-  }
+  void onPeerUpdate({required HMSPeer peer, required HMSPeerUpdate update}) {}
 
   @override
   void onReconnected() {
@@ -264,7 +286,9 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
       {HMSActionResultListenerMethod? methodType,
       Map<String, dynamic>? arguments,
       required HMSException hmsException}) {
-    // TODO: implement onException
+    if (methodType == HMSActionResultListenerMethod.sendDirectMessage) {
+      print("Failed to send direct message: ${hmsException.message}");
+    }
   }
 
   @override
@@ -273,6 +297,10 @@ class HmsRoomObserver implements HMSUpdateListener, HMSActionResultListener {
       Map<String, dynamic>? arguments}) {
     if (!_peerNodeStreamController.isClosed) {
       _peerNodeStreamController.add([]);
+    }
+    if (methodType == HMSActionResultListenerMethod.sendDirectMessage) {
+      // Optional: Notify the UI of successful message delivery
+      print("Direct message sent successfully");
     }
   }
 

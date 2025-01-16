@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class BottomMeetingControls extends StatefulWidget {
@@ -11,6 +10,7 @@ class BottomMeetingControls extends StatefulWidget {
     required this.onAudioButtonPress,
     required this.onLeaveButtonPress,
     required this.isKioskMode,
+    required this.onChatOpened,
   });
 
   final bool isVideoMuted;
@@ -19,6 +19,7 @@ class BottomMeetingControls extends StatefulWidget {
   final void Function() onAudioButtonPress;
   final void Function() onLeaveButtonPress;
   final bool isKioskMode;
+  final void Function() onChatOpened;
 
   @override
   State<BottomMeetingControls> createState() => _BottomMeetingControlsState();
@@ -30,9 +31,8 @@ class _BottomMeetingControlsState extends State<BottomMeetingControls> {
     final screenWidth = MediaQuery.of(context).size.width;
     final double buttonSize = max(50, 0.07 * screenWidth);
     final double iconSize = max(20, screenWidth * 0.025);
-
     return Container(
-      decoration: BoxDecoration(color: Colors.black54),
+      decoration: const BoxDecoration(color: Colors.black54),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -95,7 +95,26 @@ class _BottomMeetingControlsState extends State<BottomMeetingControls> {
                   ),
                 ),
               ),
-            )
+            ),
+            SizedBox(
+              width: buttonSize,
+              height: buttonSize,
+              child: RawMaterialButton(
+                onPressed: widget.onChatOpened,
+                elevation: 2.0,
+                fillColor: Colors.grey,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.message,
+                    size: iconSize,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
